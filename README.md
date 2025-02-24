@@ -1,7 +1,7 @@
 # Infrastructure Setup with Terraform
 
 ## Prerequisites
-Before you begin, ensure you have the following installed:
+Ensure you have the following installed:
 - [Terraform](https://developer.hashicorp.com/terraform/downloads)
 - [AWS CLI](https://aws.amazon.com/cli/)
 - An AWS account with necessary IAM permissions
