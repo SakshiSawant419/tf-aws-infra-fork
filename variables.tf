@@ -28,3 +28,12 @@ variable "availability_zones" {
   type        = list(string)
 }
 
+variable "ami_id" {
+  description = "AMI ID of the custom image"
+  type        = string # Replace with your actual AMI ID
+}
+
+variable "app_port" {
+  description = "Port on which the web application runs"
+  type        = number
+}
