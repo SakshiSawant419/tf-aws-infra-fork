@@ -7,7 +7,7 @@ data "aws_vpc" "selected_vpc" {
 data "aws_subnets" "existing_vpc_subnets" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.selected_vpc.id]  # ✅ Fetch subnets from the correct VPC
+    values = [data.aws_vpc.selected_vpc.id] # ✅ Fetch subnets from the correct VPC
   }
 }
 
@@ -25,7 +25,7 @@ locals {
 
 # Select subnets for EC2 (public) and RDS (private)
 locals {
-  selected_private_subnets = slice(local.private_subnets, 0, 2)  # ✅ For RDS
+  selected_private_subnets = slice(local.private_subnets, 0, 2) # ✅ For RDS
   selected_public_subnets  = slice(local.public_subnets, 0, 2)  # ✅ For EC2
 }
 
@@ -35,7 +35,7 @@ data "aws_availability_zones" "available" {}
 # 🔹 Create a DB subnet group for RDS using the dynamically selected private subnets
 resource "aws_db_subnet_group" "rds_subnet_group_new" {
   name       = "rds-subnet-group_new"
-  subnet_ids = local.selected_private_subnets  # ✅ Ensure subnets belong to vpc-0abff8e686c22038f
+  subnet_ids = local.selected_private_subnets # ✅ Ensure subnets belong to vpc-0abff8e686c22038f
 
   tags = {
     Name = "rds-subnet-group_new"
