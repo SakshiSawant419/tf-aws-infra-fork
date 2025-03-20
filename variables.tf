@@ -37,3 +37,33 @@ variable "app_port" {
   description = "Port on which the web application runs"
   type        = number
 }
+
+
+
+variable "db_username" {
+  description = "Database username"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Database password"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+}
+
+variable "db_dialect" {
+  description = "Database dialect (e.g., postgres)"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_port" {
+  description = "Database port"
+  type        = string
+  default     = "5432"
+}

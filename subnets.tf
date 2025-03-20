@@ -23,3 +23,15 @@ resource "aws_subnet" "private" {
   # }
 }
 
+resource "aws_db_subnet_group" "db_subnet" {
+  name       = "rds-subnet-group"
+  subnet_ids = aws_subnet.private[*].id
+
+  tags = {
+    Name = "rds-subnet-group"
+  }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
+}
