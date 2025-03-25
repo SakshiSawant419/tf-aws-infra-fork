@@ -1,8 +1,8 @@
 # Security Group for Web Application
-resource "aws_security_group" "app_sg" {
+resource "aws_security_group" "webapp_backend_sg" {
   name        = "webapp-security-group"
   description = "Allow inbound traffic for WebApp"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = data.aws_vpc.selected_vpc.id
 
   # Allow SSH (22), HTTP (80), HTTPS (443), and Application Port (8080)
   ingress {
@@ -52,7 +52,7 @@ resource "aws_instance" "webapp_instance" {
   instance_type = "t2.micro"
   subnet_id     = local.selected_public_subnets[0]
 
-  vpc_security_group_ids      = [aws_security_group.webapp_sg.id]
+  vpc_security_group_ids      = [aws_security_group.webapp_backend_sg.id]
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.webapp_s3_profile.name # Attach IAM role
   disable_api_termination     = false
@@ -67,25 +67,27 @@ resource "aws_instance" "webapp_instance" {
     #!/bin/bash
     echo "User Data Execution Started" >> /var/log/user-data.log
 
-    # Ensure the /opt/webapp/ directory exists
+    # Ensure the /opt/webapp/ directory exists with proper permissions
     mkdir -p /opt/webapp/
-    chmod 777 /opt/webapp/
+    chmod 750 /opt/webapp/
 
     # Write database configuration to .env
     cat <<EOT > /opt/webapp/.env
-    DB_HOST=${aws_db_instance.postgres_db.endpoint}
+    DB_HOST=${aws_db_instance.postgres_db.address}
     DB_USER=${var.db_username}
     DB_PASSWORD=${var.db_password}
     DB_NAME=${var.db_name}
     DB_DIALECT=${var.db_dialect}
     DB_PORT=${var.db_port}
-    AWS_BUCKET_NAME=${aws_s3_bucket.app_bucket.bucket}    
+    AWS_BUCKET_NAME=${aws_s3_bucket.app_bucket.bucket}
+    PORT=8080
     EOT
    
-  
-    chmod 600 /opt/webapp/.env
+    # Secure the .env file
+    chmod 640 /opt/webapp/.env
+    chown csye6225:csye6225 /opt/webapp/.env
 
-    # Ensure the webapp service exists
+    # Ensure the webapp service exists with non-privileged user
     cat <<SERVICE > /etc/systemd/system/webapp.service
     [Unit]
     Description=Web Application
@@ -94,8 +96,8 @@ resource "aws_instance" "webapp_instance" {
     [Service]
     ExecStart=/usr/bin/node /opt/webapp/app.js
     Restart=always
-    User=ubuntu
-    Group=ubuntu
+    User=csye6225
+    Group=csye6225
     EnvironmentFile=/opt/webapp/.env
 
     [Install]
