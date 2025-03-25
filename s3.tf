@@ -5,6 +5,16 @@ resource "aws_s3_bucket" "app_bucket" {
   force_destroy = true # Allows Terraform to delete non-empty bucket
 }
 
+# Make sure bucket is private
+resource "aws_s3_bucket_public_access_block" "app_bucket_access" {
+  bucket = aws_s3_bucket.app_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_versioning" "versioning" {
   bucket = aws_s3_bucket.app_bucket.id
   versioning_configuration {
@@ -19,6 +29,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
     id     = "transition-to-ia"
     status = "Enabled"
 
+    filter {
+      prefix = ""
+    }
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
