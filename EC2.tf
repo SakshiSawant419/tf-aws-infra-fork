@@ -1,15 +1,13 @@
-# Security Group for Web Application
 resource "aws_security_group" "webapp_backend_sg" {
   name        = "webapp-security-group"
   description = "Allow inbound traffic for WebApp"
   vpc_id      = data.aws_vpc.selected_vpc.id
 
-  # Allow SSH (22), HTTP (80), HTTPS (443), and Application Port (8080)
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere (consider restricting this)
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -30,10 +28,9 @@ resource "aws_security_group" "webapp_backend_sg" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow public access to your application
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -46,15 +43,14 @@ resource "aws_security_group" "webapp_backend_sg" {
   }
 }
 
-# EC2 Instance for Web Application
 resource "aws_instance" "webapp_instance" {
-  ami           = var.ami_id # Your custom AMI ID
+  ami           = var.ami_id
   instance_type = "t2.micro"
   subnet_id     = local.selected_public_subnets[0]
 
   vpc_security_group_ids      = [aws_security_group.webapp_backend_sg.id]
   associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.webapp_s3_profile.name # Attach IAM role
+  iam_instance_profile        = aws_iam_instance_profile.webapp_s3_profile.name
   disable_api_termination     = false
 
   root_block_device {
@@ -67,11 +63,11 @@ resource "aws_instance" "webapp_instance" {
     #!/bin/bash
     echo "User Data Execution Started" >> /var/log/user-data.log
 
-    # Ensure the /opt/webapp/ directory exists with proper permissions
+    # Ensure application directory exists
     mkdir -p /opt/webapp/
     chmod 750 /opt/webapp/
 
-    # Write database configuration to .env
+    # Write environment variables to .env file
     cat <<EOT > /opt/webapp/.env
     DB_HOST=${aws_db_instance.postgres_db.address}
     DB_USER=${var.db_username}
@@ -82,12 +78,12 @@ resource "aws_instance" "webapp_instance" {
     AWS_BUCKET_NAME=${aws_s3_bucket.app_bucket.bucket}
     PORT=8080
     EOT
-   
+
     # Secure the .env file
     chmod 640 /opt/webapp/.env
     chown csye6225:csye6225 /opt/webapp/.env
 
-    # Ensure the webapp service exists with non-privileged user
+    # Register Node.js app as a systemd service
     cat <<SERVICE > /etc/systemd/system/webapp.service
     [Unit]
     Description=Web Application
@@ -104,10 +100,17 @@ resource "aws_instance" "webapp_instance" {
     WantedBy=multi-user.target
     SERVICE
 
-    # Reload systemd and start the service
+    # Start the webapp service
     systemctl daemon-reload
     systemctl enable webapp.service
     systemctl restart webapp.service
+
+    # Start CloudWatch Agent using pre-baked config
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \\
+      -a fetch-config \\
+      -m ec2 \\
+      -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \\
+      -s
 
     echo "User Data Execution Completed" >> /var/log/user-data.log
   EOF
@@ -116,9 +119,3 @@ resource "aws_instance" "webapp_instance" {
     Name = "webapp-instance"
   }
 }
-
-# Output Public IP
-# output "instance_public_ip" {
-# #   description = "Public IP of the EC2 instance"
-#   value       = aws_instance.webapp_instance.public_ip
-# }
