@@ -34,7 +34,7 @@ data "aws_availability_zones" "available" {}
 
 # 🔹 Create a DB subnet group for RDS using the dynamically selected private subnets
 resource "aws_db_subnet_group" "rds_subnet_group_new" {
-  name       = "rds-subnet-group_new"
+  name       = "rds-subnet-group-alt"
   subnet_ids = local.selected_private_subnets # ✅ Ensure subnets belong to vpc-0abff8e686c22038f
 
   tags = {

@@ -1,5 +1,5 @@
 resource "aws_db_parameter_group" "db_params" {
-  name   = "postgresql-params"
+  name   = "postgresql-params-alt"
   family = "postgres17" # Change based on PostgreSQL version
 
   parameter {
