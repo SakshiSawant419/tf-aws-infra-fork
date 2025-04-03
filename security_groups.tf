@@ -1,8 +1,9 @@
 resource "aws_security_group" "webapp_sg" {
-  name        = "app-security-group"
-  description = "Allow inbound traffic for WebApp"
+  name        = "webapp-security-group"
+  description = "Allow access to app from ALB and SSH from admin"
   vpc_id      = data.aws_vpc.selected_vpc.id
-  # Allow SSH access (for management)
+
+  # Allow SSH (from anywhere — for demo/testing; restrict in production)
   ingress {
     from_port   = 22
     to_port     = 22
@@ -10,7 +11,59 @@ resource "aws_security_group" "webapp_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow HTTP (port 80)
+  # Allow app port (8080) only from Load Balancer SG
+  ingress {
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lb_sg.id]
+  }
+
+  # Outbound to all
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "webapp-sg"
+  }
+}
+
+resource "aws_security_group" "db_sg" {
+  name        = "rds-security-group-v2"
+  description = "Allow DB access from app layer only"
+  vpc_id      = data.aws_vpc.selected_vpc.id
+
+  # Only allow Postgres traffic from WebApp SG
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.webapp_sg.id]
+  }
+
+  # Outbound to all
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "db-sg"
+  }
+}
+
+resource "aws_security_group" "lb_sg" {
+  name        = "alb-sg"
+  description = "Allow inbound web traffic to ALB"
+  vpc_id      = data.aws_vpc.selected_vpc.id
+
+  # HTTP
   ingress {
     from_port   = 80
     to_port     = 80
@@ -18,7 +71,7 @@ resource "aws_security_group" "webapp_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow HTTPS (port 443)  
+  # HTTPS
   ingress {
     from_port   = 443
     to_port     = 443
@@ -26,15 +79,7 @@ resource "aws_security_group" "webapp_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Allow application port 8080
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow all outbound traffic
+  # Outbound to all
   egress {
     from_port   = 0
     to_port     = 0
@@ -43,32 +88,6 @@ resource "aws_security_group" "webapp_sg" {
   }
 
   tags = {
-    Name = "app-security-group"
-  }
-}
-
-resource "aws_security_group" "db_sg" {
-  name        = "rds-security-group"
-  description = "Security group for RDS database"
-  vpc_id      = data.aws_vpc.selected_vpc.id
-
-  # Only allow access from the application security group
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.webapp_backend_sg.id]
-  }
-
-  # Block all other access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "rds-security-group"
+    Name = "alb-sg"
   }
 }

@@ -67,3 +67,13 @@ variable "db_port" {
   type        = string
   default     = "5432"
 }
+
+variable "key_name" {
+  description = "Name of the EC2 Key Pair to allow SSH access"
+  type        = string
+}
+
+variable "subdomain" {
+  description = "Subdomain to use for Route53 record"
+  type        = string
+}

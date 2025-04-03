@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role" {
-  name = "EC2RoleForApp"
+  name = "EC2RoleForApp2"
 
   assume_role_policy = <<EOF
   {
@@ -77,6 +77,6 @@ resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {
 }
 
 resource "aws_iam_instance_profile" "webapp_s3_profile" {
-  name = "WebAppEC2InstanceProfile"
+  name = "WebAppEC2InstanceProfile-v2"
   role = aws_iam_role.ec2_role.name
 }

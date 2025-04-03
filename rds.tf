@@ -1,5 +1,5 @@
 resource "aws_db_instance" "postgres_db" {
-  identifier             = "csye6225"
+  identifier             = "csye6225-a6"
   engine                 = "postgres"
   engine_version         = "17"
   instance_class         = "db.t3.micro" # Cheapest instance
