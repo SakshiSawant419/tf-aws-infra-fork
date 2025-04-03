@@ -41,3 +41,9 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# macOS system file
+.DS_Store
+
+# IntelliJ/WebStorm project config
+.idea/
