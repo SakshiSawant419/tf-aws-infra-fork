@@ -1,8 +1,8 @@
 resource "aws_db_instance" "postgres_db" {
-  identifier             = "csye6225-a6"
-  engine                 = "postgres"
-  engine_version         = "17"
-  instance_class         = "db.t3.micro" # Cheapest instance
+  identifier             = var.db_identifier
+  engine                 = var.db_engine
+  engine_version         = var.db_engine_version
+  instance_class         = var.db_instance_class
   allocated_storage      = 20
   username               = var.db_username
   password               = var.db_password
