@@ -1,10 +1,10 @@
 # Auto Scaling Group
 resource "aws_autoscaling_group" "webapp_asg" {
-  desired_capacity     = 1
-  max_size             = 5
-  min_size             = 1
-  vpc_zone_identifier  = local.selected_public_subnets
-  target_group_arns    = [aws_lb_target_group.webapp_tg.arn]
+  desired_capacity    = 1
+  max_size            = 5
+  min_size            = 1
+  vpc_zone_identifier = local.selected_public_subnets
+  target_group_arns   = [aws_lb_target_group.webapp_tg.arn]
 
   health_check_type         = "EC2"
   health_check_grace_period = 300
@@ -23,22 +23,22 @@ resource "aws_autoscaling_group" "webapp_asg" {
 
 # Auto Scaling Policies
 resource "aws_autoscaling_policy" "scale_up" {
-  name                   = "cpu-scale-up"
-  autoscaling_group_name = aws_autoscaling_group.webapp_asg.name
-  adjustment_type        = "ChangeInCapacity"
-  scaling_adjustment     = 1
-  cooldown               = 60
-  policy_type            = "SimpleScaling"
+  name                    = "cpu-scale-up"
+  autoscaling_group_name  = aws_autoscaling_group.webapp_asg.name
+  adjustment_type         = "ChangeInCapacity"
+  scaling_adjustment      = 1
+  cooldown                = 60
+  policy_type             = "SimpleScaling"
   metric_aggregation_type = "Average"
 }
 
 resource "aws_autoscaling_policy" "scale_down" {
-  name                   = "cpu-scale-down"
-  autoscaling_group_name = aws_autoscaling_group.webapp_asg.name
-  adjustment_type        = "ChangeInCapacity"
-  scaling_adjustment     = -1
-  cooldown               = 60
-  policy_type            = "SimpleScaling"
+  name                    = "cpu-scale-down"
+  autoscaling_group_name  = aws_autoscaling_group.webapp_asg.name
+  adjustment_type         = "ChangeInCapacity"
+  scaling_adjustment      = -1
+  cooldown                = 60
+  policy_type             = "SimpleScaling"
   metric_aggregation_type = "Average"
 }
 
@@ -66,12 +66,12 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu_alarm" {
 resource "aws_cloudwatch_metric_alarm" "low_cpu_alarm" {
   alarm_name          = "Low-CPU-Alarm"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods  = 1                     # Faster reaction
+  evaluation_periods  = 1 # Faster reaction
   period              = 60
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
   statistic           = "Average"
-  threshold           = 10                   # Easier to trigger
+  threshold           = 10 # Easier to trigger
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name
