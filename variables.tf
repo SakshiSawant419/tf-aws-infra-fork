@@ -77,3 +77,27 @@ variable "subdomain" {
   description = "Subdomain to use for Route53 record"
   type        = string
 }
+
+variable "db_identifier" {
+  description = "Identifier for the RDS instance"
+  type        = string
+  default     = "csye6225-a6"
+}
+
+variable "db_engine" {
+  description = "Database engine type"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_engine_version" {
+  description = "Version of the database engine"
+  type        = string
+  default     = "17"
+}
+
+variable "db_instance_class" {
+  description = "Instance class for the RDS"
+  type        = string
+  default     = "db.t3.micro"
+}
