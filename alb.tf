@@ -1,3 +1,6 @@
+# -------------------------
+# Load Balancer and Target Group
+# -------------------------
 resource "aws_lb" "app_lb" {
   name               = "webapp-alb"
   internal           = false
@@ -16,7 +19,6 @@ resource "aws_lb_target_group" "webapp_tg" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
 
-
   health_check {
     path                = "/healthz"
     interval            = 30
@@ -27,10 +29,14 @@ resource "aws_lb_target_group" "webapp_tg" {
   }
 }
 
-resource "aws_lb_listener" "http_listener" {
+# Use only if environment is demo
+resource "aws_lb_listener" "https_demo_listener" {
+  count             = var.environment == "demo" ? 1 : 0
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.ssl_certificate_arn # Use imported cert
 
   default_action {
     type             = "forward"

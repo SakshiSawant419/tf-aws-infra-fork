@@ -60,36 +60,33 @@ resource "aws_iam_policy" "cloudwatch_agent_policy" {
     ]
   })
 }
-
-resource "aws_iam_policy" "secretsmanager_access" {
-  name        = "SecretsManagerAccess"
-  description = "Allow EC2 to get DB password from Secrets Manager and decrypt with KMS"
+resource "aws_iam_policy" "secrets_kms_access" {
+  name = "SecretsManagerKMSAccess"
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
+        Sid    = "SecretsManagerAccess",
         Effect = "Allow",
         Action = [
-          "secretsmanager:GetSecretValue"
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
         ],
-        Resource = [
-          aws_secretsmanager_secret.db_password.arn,
-          aws_secretsmanager_secret.email_credentials.arn
-        ]
+        Resource = aws_secretsmanager_secret.db_password_secret.arn
       },
       {
+        Sid    = "KMSDecryptAccess",
         Effect = "Allow",
         Action = [
           "kms:Decrypt"
         ],
-        Resource = [
-          aws_kms_key.secrets_key.arn
-        ]
+        Resource = aws_kms_key.secrets_kms.arn
       }
     ]
   })
 }
+
 
 resource "aws_iam_role_policy_attachment" "ec2_attach" {
   role       = aws_iam_role.ec2_role.name
@@ -101,12 +98,13 @@ resource "aws_iam_role_policy_attachment" "attach_cloudwatch_policy" {
   policy_arn = aws_iam_policy.cloudwatch_agent_policy.arn
 }
 
-resource "aws_iam_role_policy_attachment" "attach_secretsmanager_policy" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = aws_iam_policy.secretsmanager_access.arn
-}
 
 resource "aws_iam_instance_profile" "webapp_s3_profile" {
   name = "WebAppEC2InstanceProfile-v2"
   role = aws_iam_role.ec2_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "attach_secrets_kms_policy" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.secrets_kms_access.arn
 }

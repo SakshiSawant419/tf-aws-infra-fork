@@ -107,3 +107,13 @@ variable "admin_cidr_block" {
   type        = string
   default     = "10.0.0.0/24" # Change this to your actual admin IP range
 }
+
+variable "ssl_certificate_arn" {
+  description = "ARN of the imported SSL certificate (for demo environment)"
+  type        = string
+}
+
+variable "environment" {
+  description = "Deployment environment: dev or demo"
+  type        = string
+}
