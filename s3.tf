@@ -1,7 +1,7 @@
 # S3 Bucket for application uploads
 resource "aws_s3_bucket" "app_bucket" {
   bucket = "webapp-s3-bucket-${var.aws_region}-${random_string.bucket_suffix.result}"
-  
+
   tags = {
     Name = "webapp-s3-bucket"
   }
@@ -45,7 +45,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
     status = "Enabled"
 
     filter {
-      prefix = ""  # Apply to all objects
+      prefix = "" # Apply to all objects
     }
 
     expiration {

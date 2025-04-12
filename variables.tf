@@ -105,5 +105,5 @@ variable "db_instance_class" {
 variable "admin_cidr_block" {
   description = "CIDR block for admin SSH access"
   type        = string
-  default     = "10.0.0.0/24"  # Change this to your actual admin IP range
+  default     = "10.0.0.0/24" # Change this to your actual admin IP range
 }

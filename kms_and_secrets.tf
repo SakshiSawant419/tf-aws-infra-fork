@@ -4,7 +4,7 @@ resource "aws_kms_key" "ec2_key" {
   deletion_window_in_days = 7
   enable_key_rotation     = true
   key_usage               = "ENCRYPT_DECRYPT"
-  
+
   tags = {
     Name = "ec2-encryption-key"
   }
@@ -15,7 +15,7 @@ resource "aws_kms_key" "rds_key" {
   deletion_window_in_days = 7
   enable_key_rotation     = true
   key_usage               = "ENCRYPT_DECRYPT"
-  
+
   tags = {
     Name = "rds-encryption-key"
   }
@@ -26,7 +26,7 @@ resource "aws_kms_key" "s3_key" {
   deletion_window_in_days = 7
   enable_key_rotation     = true
   key_usage               = "ENCRYPT_DECRYPT"
-  
+
   tags = {
     Name = "s3-encryption-key"
   }
@@ -37,7 +37,7 @@ resource "aws_kms_key" "secrets_key" {
   deletion_window_in_days = 7
   enable_key_rotation     = true
   key_usage               = "ENCRYPT_DECRYPT"
-  
+
   tags = {
     Name = "secrets-encryption-key"
   }
@@ -75,15 +75,15 @@ resource "random_password" "db_password" {
 resource "aws_secretsmanager_secret" "db_password" {
   name                    = "rds-db-password-${var.aws_region}"
   kms_key_id              = aws_kms_key.secrets_key.arn
-  recovery_window_in_days = 0  # To avoid conflicts with deletion
-  
+  recovery_window_in_days = 0 # To avoid conflicts with deletion
+
   tags = {
     Name = "Database Password Secret"
   }
 }
 
 resource "aws_secretsmanager_secret_version" "db_password_version" {
-  secret_id     = aws_secretsmanager_secret.db_password.id
+  secret_id = aws_secretsmanager_secret.db_password.id
   secret_string = jsonencode({
     username = var.db_username,
     password = random_password.db_password.result,
@@ -99,7 +99,7 @@ resource "aws_secretsmanager_secret" "email_credentials" {
   name                    = "email-service-credentials-${var.aws_region}"
   kms_key_id              = aws_kms_key.secrets_key.arn
   recovery_window_in_days = 0
-  
+
   tags = {
     Name = "Email Service Credentials"
   }
@@ -107,7 +107,7 @@ resource "aws_secretsmanager_secret" "email_credentials" {
 
 # You can populate this with your email service credentials
 resource "aws_secretsmanager_secret_version" "email_credentials_version" {
-  secret_id     = aws_secretsmanager_secret.email_credentials.id
+  secret_id = aws_secretsmanager_secret.email_credentials.id
   secret_string = jsonencode({
     smtp_host     = "smtp.example.com",
     smtp_port     = "587",

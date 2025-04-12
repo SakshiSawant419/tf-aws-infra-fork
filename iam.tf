@@ -10,7 +10,7 @@ resource "aws_iam_role" "ec2_role" {
           Service = "ec2.amazonaws.com"
         },
         Effect = "Allow",
-        Sid = ""
+        Sid    = ""
       }
     ]
   })

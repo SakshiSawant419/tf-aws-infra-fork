@@ -7,7 +7,7 @@ resource "aws_launch_template" "webapp_lt" {
   # Apply KMS encryption to EBS volumes
   block_device_mappings {
     device_name = "/dev/sda1"
-    
+
     ebs {
       volume_size           = 20
       volume_type           = "gp3"

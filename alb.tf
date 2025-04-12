@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "webapp_tg" {
   name     = "webapp-tg"
   port     = var.app_port
   protocol = "HTTP"
-  vpc_id = aws_vpc.main.id
+  vpc_id   = aws_vpc.main.id
 
 
   health_check {
