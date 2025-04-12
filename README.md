@@ -51,6 +51,16 @@ To delete the infrastructure, run:
 terraform destroy -var-file=dev.tfvars
 ```
 
+# To import an SSL certificate into AWS Certificate Manager for the demo environment:
+```sh
+ aws acm import-certificate \
+   --certificate fileb://certificate.crt \
+   --private-key fileb://private.key \
+   --certificate-chain fileb://ca_bundle.crt \
+   --region us-east-1 \
+   --profile demo
+```
+
 ## Continuous Integration (CI)
 This repository includes a GitHub Actions workflow for CI:
 - **Terraform CI**: Runs `terraform fmt` and `terraform validate` on every pull request.
