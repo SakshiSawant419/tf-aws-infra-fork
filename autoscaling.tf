@@ -1,10 +1,10 @@
 resource "aws_autoscaling_group" "webapp_asg" {
-  name                      = "webapp-asg"
-  desired_capacity          = 3
-  max_size                  = 5
-  min_size                  = 3
-  vpc_zone_identifier       = local.selected_public_subnets
-  target_group_arns         = [aws_lb_target_group.webapp_tg.arn]
+  name                = "webapp-asg"
+  desired_capacity    = 3
+  max_size            = 5
+  min_size            = 3
+  vpc_zone_identifier = local.selected_public_subnets
+  target_group_arns   = [aws_lb_target_group.webapp_tg.arn]
 
   health_check_type         = "ELB" # ✅ This is CRUCIAL
   health_check_grace_period = 300

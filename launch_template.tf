@@ -21,7 +21,7 @@ resource "aws_launch_template" "webapp_lt" {
   }
 
   network_interfaces {
-    device_index              = 0
+    device_index                = 0
     associate_public_ip_address = true
     security_groups             = [aws_security_group.webapp_sg.id]
   }

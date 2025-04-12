@@ -31,7 +31,7 @@ resource "aws_kms_key" "secrets_kms" {
 resource "random_password" "db_pass" {
   length           = 16
   special          = true
-  override_special = "!#$%^&*()-_=+[]{}<>:?.,"  # Fixed: Removed '/' and '"'
+  override_special = "!#$%^&*()-_=+[]{}<>:?.," # Fixed: Removed '/' and '"'
 }
 
 resource "aws_secretsmanager_secret" "db_password_secret" {
@@ -43,4 +43,4 @@ resource "aws_secretsmanager_secret" "db_password_secret" {
 resource "aws_secretsmanager_secret_version" "db_password_secret_value" {
   secret_id     = aws_secretsmanager_secret.db_password_secret.id
   secret_string = random_password.db_pass.result
-}  # ✅ Only secrets and password logic remain here
+} # ✅ Only secrets and password logic remain here
