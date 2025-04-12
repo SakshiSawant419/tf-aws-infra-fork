@@ -14,3 +14,7 @@ resource "aws_route53_record" "webapp_dns" {
     evaluate_target_health = true
   }
 }
+
+
+
+

@@ -1,8 +1,8 @@
 # Auto Scaling Group
 resource "aws_autoscaling_group" "webapp_asg" {
-  desired_capacity    = 1
+  desired_capacity    = 3
   max_size            = 5
-  min_size            = 1
+  min_size            = 3
   vpc_zone_identifier = local.selected_public_subnets
   target_group_arns   = [aws_lb_target_group.webapp_tg.arn]
 
@@ -71,7 +71,7 @@ resource "aws_cloudwatch_metric_alarm" "low_cpu_alarm" {
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
   statistic           = "Average"
-  threshold           = 10 # Easier to trigger
+  threshold           = 3 # Easier to trigger
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name

@@ -1,12 +1,33 @@
-resource "random_uuid" "s3_bucket_uuid" {}
-
+# S3 Bucket for application uploads
 resource "aws_s3_bucket" "app_bucket" {
-  bucket        = random_uuid.s3_bucket_uuid.result
-  force_destroy = true # Allows Terraform to delete non-empty bucket
+  bucket = "webapp-s3-bucket-${var.aws_region}-${random_string.bucket_suffix.result}"
+
+  tags = {
+    Name = "webapp-s3-bucket"
+  }
 }
 
-# Make sure bucket is private
-resource "aws_s3_bucket_public_access_block" "app_bucket_access" {
+# Random string for unique bucket name
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
+# Enable server-side encryption with KMS
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_encryption" {
+  bucket = aws_s3_bucket.app_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.s3_key.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+# Block public access
+resource "aws_s3_bucket_public_access_block" "block_public_access" {
   bucket = aws_s3_bucket.app_bucket.id
 
   block_public_acls       = true
@@ -15,36 +36,20 @@ resource "aws_s3_bucket_public_access_block" "app_bucket_access" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.app_bucket.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
+# Bucket lifecycle policy - fixed with filter
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   bucket = aws_s3_bucket.app_bucket.id
 
   rule {
-    id     = "transition-to-ia"
+    id     = "expire-old-objects"
     status = "Enabled"
 
     filter {
-      prefix = ""
+      prefix = "" # Apply to all objects
     }
-    transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
-    }
-  }
-}
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
-  bucket = aws_s3_bucket.app_bucket.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+    expiration {
+      days = 90
     }
   }
 }
